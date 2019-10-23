@@ -21,7 +21,7 @@ def extract_data():
 
 
 def request_gender(name):
-    logging.debug('Lowercasing all letters of ' + name + 'this will avoid replication in cache')
+    logging.debug('Lowercasing all letters of \'' + name + '\' this will avoid replication in cache')
     name.lower()
     if name in API_CACHE:
         logging.debug(name + ' already cached. Using cache instead of api request')
@@ -39,11 +39,11 @@ def request_gender(name):
             request_content = json.loads(
                 requests.get('https://api.genderize.io?name=' + name).content
             )
-            logging.debug('GET Request to Genderize API (worldwide mode). Name requested: ' + name)
+            logging.debug('GET Request to Genderize API (worldwide mode). Name requested: ' + name + '\'')
             logging.debug('response content: ' + str(request_content))
             gender = request_content['gender']
         API_CACHE[name] = gender
-        logging.debug(str(name) + ' added to cache as {' + str(gender) + '}')
+        logging.debug('\'' + str(name) + ' \'added to cache as {' + str(gender) + '}')
     return gender
 
 
