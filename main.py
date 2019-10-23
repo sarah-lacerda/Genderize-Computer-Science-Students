@@ -3,7 +3,8 @@ import json
 import requests
 import time
 
-VERBOSE = False
+# Saves API requests
+API_CACHE = {}
 
 def extract_data():
     people = []
@@ -22,11 +23,21 @@ def extract_data():
 
 
 def request_gender(name):
-    request_content = json.loads(requests.get('https://api.genderize.io?name=' + name).content)
-    if VERBOSE:
-        print('GET Request to Genderize API. Name requested: ' + name)
-        print('response content: ' + request_content)
-    return request_content['gender']
+    if name in API_CACHE:
+        if VERBOSE:
+            print(name + ' already cached. Using cache instead of api request')
+            gender = API_CACHE[name]
+            print('cached gender: ' + str(gender))
+    else:
+        request_content = json.loads(requests.get('https://api.genderize.io?name=' + name + '&country_id=BR').content)
+        if VERBOSE:
+            print('GET Request to Genderize API. Name requested: ' + name)
+            print('response content: ' + str(request_content))
+        gender = request_content['gender']
+        API_CACHE[name] = gender
+        if VERBOSE:
+            print(str(name) + ' added to cache as {' + str(gender) + '}')
+    return gender
 
 
 def genderize(list_of_names):
@@ -70,16 +81,13 @@ def generate_stats():
     print('Count of undefined:' + str(len(undefined_names)))
 
 start_time = time.time()
+VERBOSE = False
+if '-v' in sys.argv:
+    VERBOSE = True
 if '-g' in sys.argv:
     genders = genderize(extract_data())
     write(genders[0], genders[1], genders[2])
-
-if '-v' in sys.argv:
-    VERBOSE = True
-
 if '-s' in sys.argv:
     generate_stats()
-
-extract_data()
 
 print("Done! Lasted " + str(time.time() - start_time))
